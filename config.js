@@ -1,52 +1,59 @@
-let fs = require('fs')
-let chalk = require('chalk')
+import fs from 'fs';
+import path from 'path';
 
-global.owner = ['6283128734012', '6287755080455'] // Letakan nomor kamu disini
+// Load .env secara mandiri tanpa dependensi tambahan
+try {
+  const envPath = path.join(process.cwd(), '.env');
+  if (fs.existsSync(envPath)) {
+    const envLines = fs.readFileSync(envPath, 'utf8').split('\n');
+    for (const line of envLines) {
+      const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+      if (match) {
+        const key = match[1];
+        let val = (match[2] || '').trim();
+        if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
+        if (val.startsWith("'") && val.endsWith("'")) val = val.slice(1, -1);
+        process.env[key] = val;
+      }
+    }
+  }
+} catch (e) {}
 
-global.APIs = { // API Prefix
-  // nama: 'https://website'
-  amel: 'https://melcanz.com',
-  bx: 'https://bx-hunter.herokuapp.com',
-  rey: 'https://api.reysekha.my.id',
-  dhnjing: 'https://dhnjing.xyz',
-  hardianto: 'https://hardianto.xyz',
-  neoxr: 'https://api.neoxr.eu.org',
-  nrtm: 'https://nurutomo.herokuapp.com',
-  pencarikode: 'https://api.chipa.xyz',
-  waifupics: 'https://api.waifu.pics',
-  xteam: 'https://api.xteam.xyz',
-  zeks: 'https://api.zeks.me',
-}
-global.APIKeys = { // APIKey nya disini
-  // 'https://website': 'apikey'
-  'https://melcanz.com': 'trial',
-  'https://api.reysekha.my.id': 'apirey',
-  'https://bx-hunter.herokuapp.com': 'Ikyy69',
-  'https://hardianto.xyz': 'hardianto',
-  'https://api.neoxr.eu.org': 'yntkts',
-  'https://api.chipa.xyz': 'pais',
-  'https://api.xteam.xyz': 'apikeymu',
-  'https://api.zeks.me': 'apivinz',
-}
+// Parse OWNER_NUMBER dari string comma-separated, JSON array, atau string tunggal
+const parseOwnerList = (raw) => {
+  if (!raw) return [];
+  raw = raw.trim();
+  if (raw.startsWith('[') && raw.endsWith(']')) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.map(n => String(n).replace(/[^0-9]/g, '')).filter(Boolean);
+    } catch (e) {}
+  }
+  return raw.split(',').map(n => n.replace(/[^0-9]/g, '')).filter(Boolean);
+};
 
-// Sticker WM
-global.packname = 'arif️fb'
-global.author = 'amel'
+global.owner = parseOwnerList(process.env.OWNER_NUMBER || '');
+global.isOwner = (numOrJid = '') => {
+  if (!numOrJid) return false;
+  const num = String(numOrJid).split('@')[0].split(':')[0].replace(/[^0-9]/g, '');
+  return global.owner.includes(num);
+};
 
-global.wm = '© ariffb & melcanz'
-global.wait = '_*tunggu sedang diproses...*_'
-global.eror = '_*Server Error*_'
-global.benar = '✅'
-global.salah = '❌'
-global.dikit = 'dikit lagi'
-global.fla = 'https://www6.flamingtext.com/net-fu/proxy_form.cgi?&imageoutput=true&script=sketch-name&doScale=true&scaleWidth=800&scaleHeight=500&fontsize=100&fillTextType=1&fillTextPattern=Warning!&fillColor1Color=%23f2aa4c&fillColor2Color=%23f2aa4c&fillColor3Color=%23f2aa4c&fillColor4Color=%23f2aa4c&fillColor5Color=%23f2aa4c&fillColor6Color=%23f2aa4c&fillColor7Color=%23f2aa4c&fillColor8Color=%23f2aa4c&fillColor9Color=%23f2aa4c&fillColor10Color=%23f2aa4c&fillOutlineColor=%23f2aa4c&fillOutline2Color=%23f2aa4c&backgroundColor=%23101820&text='
+global.APIs = {
+  zans: 'https://api.zansxart.me'
+};
 
-global.multiplier = 69 // Semakin tinggi, semakin sulit naik level
+global.APIKeys = {
+  'https://api.zansxart.me': process.env.ZANS_API_KEY || ''
+};
 
-let file = require.resolve(__filename)
-fs.watchFile(file, () => {
-  fs.unwatchFile(file)
-  console.log(chalk.redBright("Update 'config.js'"))
-  delete require.cache[file]
-  require(file)
-})
+global.API = (name, path = '/', query = {}, apikeyqueryname = 'apikey') => {
+  const baseURL = name in global.APIs ? global.APIs[name] : name;
+  const apikey = global.APIKeys[baseURL] || '';
+  const searchParams = new URLSearchParams(Object.entries({
+    ...query,
+    ...(apikeyqueryname && apikey ? { [apikeyqueryname]: apikey } : {})
+  }));
+  const qs = searchParams.toString();
+  return baseURL + path + (qs ? '?' + qs : '');
+};

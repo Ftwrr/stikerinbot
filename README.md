@@ -1,125 +1,80 @@
+# Stikerin Bot 🚀
+
+Bot WhatsApp modern, ringan, dan cepat berbasis engine **zapo-js** dengan runtime **Bun**, difokuskan untuk integrasi fitur REST API **[api.zansxart.me](https://api.zansxart.me)**.
+
 <p align="center">
-	<img src="https://i.ibb.co/jr9Nh6Q/Thumb.jpg" width="35%" style="margin-left: auto;margin-right: auto;display: block;">
+  <a href="https://saweria.co/ariffb" target="_blank">
+    <img src="https://img.shields.io/badge/Saweria-Dukung%20Kreator-orange?style=for-the-badge&logo=coffee" alt="Dukung via Saweria" />
+  </a>
 </p>
-<h1 align="center">stikerinbot</h1>
 
+---
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ariffb25/stikerinbot)
+## ⚡ Dependensi yang Diperlukan
 
-[![Grup WhatsApp](https://img.shields.io/badge/WhatsApp%20Group-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/GVwpKf83s42D1CnIfDW19G)
+### 1. Kebutuhan Sistem (OS Linux / Ubuntu / Debian)
+- [Bun](https://bun.sh) versi terbaru (v1.4.2)
+- `ffmpeg` (Pengolahan audio & video)
+- `libwebp-tools` & `imagemagick` (Konversi stiker WebP)
+- `pm2` (Process manager untuk production)
 
-## UNTUK PENGGUNA WINDOWS/VPS/RDP
-
-* Unduh & Instal Git [`Klik Disini`](https://git-scm.com/downloads)
-* Unduh & Instal NodeJS [`Klik Disini`](https://nodejs.org/en/download)
-* Unduh & Instal FFmpeg [`Klik Disini`](https://ffmpeg.org/download.html) (**Jangan Lupa Tambahkan FFmpeg ke variabel lingkungan PATH**)
-* Unduh & Instal ImageMagick [`Klik Disini`](https://imagemagick.org/script/download.php)
-
+Perintah instalasi paket sistem:
 ```bash
-git clone https://github.com/ariffb25/stikerinbot
-cd stikerinbot
-npm i
-npm update
-node .
+sudo apt update && sudo apt install -y ffmpeg webp imagemagick
+npm install -g pm2
 ```
 
----------
-
-## UNTUK PENGGUNA HEROKU
-
-### Instal Buildpack
-* heroku/nodejs
-* https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git
-* https://github.com/DuckyTeam/heroku-buildpack-imagemagick.git
-
----------
-
-## Arguments `node . [--options] [<session name>]`
-
-#### Contoh: `node . --self --restrict --autoread`
-
-### `--self`
-
-Aktifkan mode self (Mengabaikan yang lain)
-
-### `--prefix <prefixes>`
-
-* `prefixes` dipisahkan oleh masing-masing karakter
-Setel awalan
-
-### `--server`
-
-Digunakan untuk [heroku](https://heroku.com/) atau pindai melalui situs web
-
-### `--db <json-server-url>`
-
-Gunakan db eksternal alih-alih db lokal, 
-Contoh Server `https://json-server.nurutomo.repl.co/`
-Code: `https://repl.it/@Nurutomo/json-server`
-
-`node . --db 'https://json-server.nurutomo.repl.co/'`
-
-Server harus memiliki spesifikasi seperti ini
-
-#### GET
-
-```http
-GET /
-Accept: application/json
+### 2. Dependensi Node/Bun
+Instal dependensi project dengan Bun:
+```bash
+bun install
 ```
 
-#### POST
+---
 
-```http
-POST /
-Content-Type: application/json
+## ⚙️ Konfigurasi Environment
 
-{
- data: {}
-}
+Salin atau rename file `.env.example` menjadi `.env`, lalu sesuaikan isinya:
+```bash
+cp .env.example .env
 ```
 
-### `--big-qr`
-
-Jika qr unicode kecil tidak mendukung
-
-### `--restrict`
-
-Mengaktifkan plugin terbatas (yang dapat menyebabkan nomor Anda **diblokir** jika digunakan terlalu sering)
-
-* Administrasi Grup `add, kick, promote, demote`
-
-### `--img`
-
-Aktifkan pemeriksa gambar melalui terminal
-
-### `--autoread`
-
-Jika diaktifkan, semua pesan masuk akan ditandai sebagai telah dibaca
-
-### `--nyimak`
-
-Tidak ada bot, cukup cetak pesan yang diterima dan tambahkan pengguna ke database
-
-### `--test`
-
-**Development** Testing Mode
-
-### `--trace`
-
-```js
-conn.logger.level = 'trace'
+Isi konfigurasi pada file `.env`:
+```env
+SESSION_DIR=session_auth
+OWNER_NUMBER=628xxxxxxxxxx
+ZANS_API_KEY=your_api_key_here
 ```
 
-### `--debug`
+---
 
-```js
-conn.logger.level = 'debug'
+## 🚀 Menjalankan Bot
+
+### Mode Development
+```bash
+# Menjalankan langsung
+bun index.js
+
+# Mode auto-reload
+bun dev
 ```
 
----------
+### Pemasangan Production via PM2
+Gunakan `ecosystem.config.cjs` yang sudah dikonfigurasi menggunakan interpreter Bun:
+```bash
+# Start bot via PM2
+pm2 start ecosystem.config.cjs
 
- [![Nurutomo](https://github.com/Nurutomo.png?size=100)](https://github.com/Nurutomo) | [![Ariffb](https://github.com/ariffb25.png?size=100)](https://github.com/ariffb25)
-----|----
-[Nurutomo](https://github.com/Nurutomo) | [Ariffb](https://github.com/ariffb25)
- Penulis / Pencipta | Penulis ulang
+# Simpan state PM2 agar auto-start saat reboot
+pm2 save
+pm2 startup
+
+# Monitoring log
+pm2 logs stikerinbot
+```
+
+---
+
+## 📄 Lisensi
+
+Proyek ini dilisensikan di bawah lisensi [MIT](LICENSE).

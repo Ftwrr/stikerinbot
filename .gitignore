@@ -1,4 +1,4 @@
-# Node.js Modules
+sessions# Node.js Modules
 node_modules
 
 # important session
@@ -28,3 +28,23 @@ package-lock.json
 
 # Vscode Settings
 .vscode
+# Local config & secret
+AGENTS.md
+sessions/
+auth_*
+.auth*
+*.sqlite*
+*.log
+tmp/
+node_modules/
+deepseek_sessions/
+message-cache/
+settings-*.json
+zapo-*.sqlite*
+
+# API Secrets & Config
+.env
+
+# Database and runtime json
+db/
+*.sqlite*
