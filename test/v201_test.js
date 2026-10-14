@@ -142,3 +142,149 @@ describe("Message Serializer (smsg) and LID Quoted Handling", () => {
         expect(reply.id).toBe(".claim");
     });
 });
+
+describe("Group Utils", () => {
+    test("numFromJid & findParticipant resolve LID vs phone", async () => {
+        const { numFromJid, findParticipant, isAdminParticipant } = await import("../lib/group_utils.js");
+
+        expect(numFromJid("628123456789:12@s.whatsapp.net")).toBe("628123456789");
+        expect(numFromJid("22914321629255@lid")).toBe("22914321629255");
+
+        const meta = {
+            participants: [
+                { jid: "111@lid", lid: "111@lid", phoneNumber: "628999888777@s.whatsapp.net", isAdmin: true },
+                { jid: "628111222333@s.whatsapp.net", isAdmin: false }
+            ]
+        };
+
+        const admin = findParticipant(meta, "628999888777@s.whatsapp.net");
+        expect(admin.jid).toBe("111@lid");
+        expect(isAdminParticipant(admin)).toBe(true);
+
+        const member = findParticipant(meta, "628111222333@s.whatsapp.net");
+        expect(isAdminParticipant(member)).toBe(false);
+    });
+
+    test("resolveTarget prioritizes mention then reply then phone", async () => {
+        const { resolveTarget } = await import("../lib/group_utils.js");
+
+        expect(resolveTarget({ mentionedJid: ["6281@s.whatsapp.net"] }, "")).toBe("6281@s.whatsapp.net");
+        expect(resolveTarget({ quoted: { sender: "6282@s.whatsapp.net" } }, "")).toBe("6282@s.whatsapp.net");
+        expect(resolveTarget({}, "08123456789")).toBe("628123456789@s.whatsapp.net");
+    });
+});
+
+describe("Rich Handler Registry", () => {
+    test("onRichReply / getRichHandler roundtrip", async () => {
+        const { onRichReply, getRichHandler, offRichReply } = await import("../lib/rich_handler.js");
+
+        const fn = async () => true;
+        onRichReply("ww:test:1", fn);
+        expect(getRichHandler("ww:test:1")).toBe(fn);
+
+        offRichReply("ww:test:1");
+        expect(getRichHandler("ww:test:1")).toBeUndefined();
+    });
+});
+
+describe("Werewolf Engine", () => {
+    test("computeRoleList scales roles with player count", async () => {
+        const { computeRoleList } = await import("../lib/werewolf.js");
+
+        const five = computeRoleList(5);
+        expect(five.length).toBe(5);
+        expect(five.filter(r => r === "werewolf").length).toBe(1);
+        expect(five).toContain("seer");
+
+        const eight = computeRoleList(8);
+        expect(eight.length).toBe(8);
+        expect(eight.filter(r => r === "werewolf").length).toBe(2);
+        expect(eight).toContain("sorcerer");
+    });
+});
+
+describe("Group Access & Anti-Link", () => {
+    const meta = {
+        subject: "Grup Tes",
+        desc: "deskripsi",
+        owner: "628999888777@s.whatsapp.net",
+        announce: false,
+        participants: [
+            { jid: "111@lid", lid: "111@lid", phoneNumber: "628999888777@s.whatsapp.net", isAdmin: true },
+            { jid: "628111222333@s.whatsapp.net", isAdmin: false },
+            { jid: "999@lid", lid: "999@lid", phoneNumber: "628555666777@s.whatsapp.net", isAdmin: false }
+        ]
+    };
+
+    const fakeClient = () => ({
+        user: { id: "628999888777:5@s.whatsapp.net" },
+        group: { queryGroupMetadata: async () => meta },
+        sent: [],
+        sendMessage(jid, content) { this.sent.push({ jid, content }); return { id: "X" }; }
+    });
+
+    test("resolveGroupAccess detects admin sender & bot admin", async () => {
+        const { resolveGroupAccess, invalidateGroupCache } = await import("../lib/group_utils.js");
+        invalidateGroupCache();
+
+        const client = fakeClient();
+        const access = await resolveGroupAccess(client, {
+            chat: "123@g.us",
+            sender: "628111222333@s.whatsapp.net",
+            senderNumber: "628111222333",
+            realPhone: "628111222333"
+        });
+        expect(access.isAdmin).toBe(false);
+        expect(access.isBotAdmin).toBe(true);
+
+        const adminAccess = await resolveGroupAccess(client, {
+            chat: "123@g.us",
+            sender: "628555666777@s.whatsapp.net",
+            realPhone: "628555666777"
+        });
+        expect(adminAccess.isAdmin).toBe(false);
+    });
+
+    test("anti-link watcher deletes link from non-admin, skips admin", async () => {
+        const { invalidateGroupCache } = await import("../lib/group_utils.js");
+        invalidateGroupCache();
+
+        global.db = global.db || { data: {}, scheduleSave() {} };
+        global.db.data = global.db.data || {};
+        global.db.data.chats = { "123@g.us": { antiLink: true } };
+
+        const watcher = (await import("../plugins/group/antilink_watcher.js")).default;
+        const client = fakeClient();
+        const replies = [];
+        const reply = async (t) => replies.push(t);
+
+        // Non-admin kirim link → dihapus + true
+        const handled = await watcher({
+            isGroup: true,
+            chat: "123@g.us",
+            sender: "628555666777@s.whatsapp.net",
+            senderNumber: "628555666777",
+            realPhone: "628555666777",
+            cleanText: "cek https://example.com",
+            key: { id: "MSG1", participant: "628555666777@s.whatsapp.net" },
+            isOwner: false
+        }, { client, reply });
+
+        expect(handled).toBe(true);
+        expect(client.sent[0].content.delete.id).toBe("MSG1");
+        expect(replies.length).toBe(1);
+
+        // Admin kirim link → diabaikan
+        const handledAdmin = await watcher({
+            isGroup: true,
+            chat: "123@g.us",
+            sender: "628999888777@s.whatsapp.net",
+            realPhone: "628999888777",
+            cleanText: "cek https://example.com",
+            key: { id: "MSG2" },
+            isOwner: false
+        }, { client, reply });
+
+        expect(handledAdmin).toBe(false);
+    });
+});

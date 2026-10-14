@@ -17,6 +17,8 @@ import { resolvePhoneNumberFromMsg } from './lib/lid_helper.js';
 import { restoreClonedSessions } from './lib/jadibot_zapo.js';
 import { loadPlugins, startPluginWatcher, handlePluginMessage } from './lib/plugin_manager.js';
 import { smsg } from './lib/simple.js';
+import { getRichHandler } from './lib/rich_handler.js';
+import { handleDeadPlayerChat, restoreWwGames } from './lib/werewolf.js';
 import { getBotSettings } from './lib/settings.js';
 import { startPremiumExpiryScheduler } from './lib/premium_scheduler.js';
 import { startBannedExpiryScheduler } from './lib/banned_scheduler.js';
@@ -695,10 +697,18 @@ async function connectToWhatsApp() {
 
                 // Revoke / Delete Message
                 if (content.delete) {
-                    const deleteKey = content.delete;
-                    const targetId = deleteKey?.id || (typeof deleteKey === 'string' ? deleteKey : '');
+                    const d = content.delete;
+                    const targetId = d?.id || (typeof d === 'string' ? d : '');
                     if (targetId) {
-                        return client.message.send(jid, { type: 'revoke', target: { id: targetId, remoteJid: jid, fromMe: true } }, sendOpts).catch(() => {});
+                        return client.message.send(jid, {
+                            type: 'revoke',
+                            target: {
+                                id: targetId,
+                                remoteJid: d?.remoteJid || jid,
+                                fromMe: d?.fromMe ?? true,
+                                participant: d?.participant
+                            }
+                        }, sendOpts).catch(() => {});
                     }
                 }
 
@@ -788,6 +798,7 @@ async function connectToWhatsApp() {
                 import('./lib/game_manager.js').then(({ restoreActiveGames }) => {
                     restoreActiveGames(client);
                 }).catch(() => {});
+                try { restoreWwGames(client); } catch (e) { console.error('[Werewolf Restore]', e.message); }
             }, 3000);
         } else if (event.status === 'close') {
             console.log(`Disconnected: ${event.reason}`);
@@ -1025,7 +1036,25 @@ async function connectToWhatsApp() {
         const myLid = client.user?.lid || '';
         const senderNumber = sender.split('@')[0].split(':')[0];
 
-        const isCommand = cleanText.startsWith('.') || cleanText.startsWith('!') || cleanText.startsWith('/') || cleanText.startsWith('#') || cleanText.startsWith('$') || cleanText.startsWith('>') || /https?:\/\/[^\s]+/i.test(cleanText);
+        // ─── Rich Reply (Tombol/List native flow) Intercept ───────────────────
+        if (m.richReply) {
+            const richHandler = getRichHandler(m.richReply.id);
+            if (richHandler) {
+                try {
+                    await richHandler(m, m.richReply);
+                } catch (err) {
+                    console.error('[RichReply Handler Error]', err);
+                }
+                return;
+            }
+        }
+
+        // ─── Werewolf: cegah pemain yang sudah gugur chat di grup ─────────────
+        try {
+            if (await handleDeadPlayerChat(client, m)) return;
+        } catch (e) {}
+
+        const isCommand = Boolean(m.richReply) || cleanText.startsWith('.') || cleanText.startsWith('!') || cleanText.startsWith('/') || cleanText.startsWith('#') || cleanText.startsWith('$') || cleanText.startsWith('>') || /https?:\/\/[^\s]+/i.test(cleanText);
 
         // Hanya skip pesan bot sendiri jika BUKAN command / link dari Owner
         if (!isCommand && (sender === myJid || sender === myLid || (myNumber && senderNumber === myNumber))) {
