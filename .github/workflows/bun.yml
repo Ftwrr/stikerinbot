@@ -23,4 +23,4 @@ jobs:
 
     - name: Verify Plugin Loader
       run: |
-        bun -e "import('./plugin_manager.js').then(async m => { const p = await m.loadPlugins(); if (!p || p.length === 0) process.exit(1); console.log('Plugins OK:', p.length); })"
+        bun -e "import('./lib/plugin_manager.js').then(async m => { const p = await m.loadPlugins(); if (!p || p.length === 0) process.exit(1); console.log('Plugins OK:', p.length); })"

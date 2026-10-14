@@ -1,4 +1,4 @@
-import './config.js';
+import './lib/config.js';
 import { WaClient, createStore, createPinoLogger, WA_DISCONNECT_REASONS, fetchLatestWaWebVersion, downloadMediaMessage, unwrapMessage, getContentType } from 'zapo-js';
 import { createSqliteStore } from '@zapo-js/store-sqlite';
 import { createMediaProcessor } from '@zapo-js/media-utils';
@@ -15,57 +15,30 @@ import qrcode from 'qrcode-terminal';
 
 import { resolvePhoneNumberFromMsg } from './lib/lid_helper.js';
 import { restoreClonedSessions } from './lib/jadibot_zapo.js';
-import { loadPlugins, startPluginWatcher, handlePluginMessage } from './plugin_manager.js';
-import { smsg } from './simple.js';
+import { loadPlugins, startPluginWatcher, handlePluginMessage } from './lib/plugin_manager.js';
+import { smsg } from './lib/simple.js';
 import { getBotSettings } from './lib/settings.js';
 import { startPremiumExpiryScheduler } from './lib/premium_scheduler.js';
 import { startBannedExpiryScheduler } from './lib/banned_scheduler.js';
 import { startJoinExpiryScheduler } from './lib/join_scheduler.js';
 import { evaluateAntiCall } from './lib/anti_call.js';
+import { messageCache } from './lib/message_cache.js';
 
 const AUTH_DIR_NAME = process.env.SESSION_DIR || "session_auth";
-
 
 let client = null;
 const chatNameCache = new Map();
 
-// Register Web Dashboard API
-
 function saveToStore(msg) {
-    if (!msg.key?.id) return;
-    const cacheDir = './message-cache';
-    if (!fs.existsSync(cacheDir)) {
-        fs.mkdirSync(cacheDir, { recursive: true });
-    }
-    const file = path.join(cacheDir, `${msg.key.id}.json`);
-    console.log(`[Cache-Disk] Saving message ID: ${msg.key.id}`);
-    fs.writeFileSync(file, JSON.stringify(msg), 'utf8');
+    messageCache.save(msg);
 }
 
 function getFromStore(id) {
-    const file = path.join('./message-cache', `${id}.json`);
-    try {
-        const raw = fs.readFileSync(file, 'utf8');
-        return JSON.parse(raw);
-    } catch {
-        return null;
-    }
+    return messageCache.get(id);
 }
 
 function cleanOldCache() {
-    const cacheDir = './message-cache';
-    if (!fs.existsSync(cacheDir)) return;
-    try {
-        const files = fs.readdirSync(cacheDir);
-        const now = Date.now();
-        for (const file of files) {
-            const filePath = path.join(cacheDir, file);
-            const stats = fs.statSync(filePath);
-            if (now - stats.mtimeMs > 86400000) {
-                fs.unlinkSync(filePath);
-            }
-        }
-    } catch (e) {}
+    messageCache.clean();
 }
 
 function getCustomNameDb() {
@@ -622,60 +595,6 @@ async function handleRvoByQuoted(quotedMsg, targetJid, originalMsgKey) {
     } catch (err) { console.error("RVO React Error:", err); }
 }
 
-const GOLD_SETTINGS_FILE = './gold-settings.json';
-
-function getGoldSettings() {
-    try { if (fs.existsSync(GOLD_SETTINGS_FILE)) { const data = JSON.parse(fs.readFileSync(GOLD_SETTINGS_FILE, 'utf8')); if (data.interval === undefined) data.interval = 24; return data; } } catch (e) {}
-    return { enabled: true, interval: 24 };
-}
-
-function setGoldSettings(settings) { try { fs.writeFileSync(GOLD_SETTINGS_FILE, JSON.stringify(settings), 'utf8'); } catch (e) {} }
-
-async function getGoldPrice() {
-    try {
-        const today = new Date().toISOString().split('T')[0];
-        const res = await axios.post('https://webv2-api.treasury.id/api/v1/external/wp/gold/price', { start_date: today, end_date: today, type: 'daily', region: 'id', assetType: 'gold' }, { headers: { 'Content-Type': 'application/json' }, timeout: 20000 });
-        const attrs = res.data?.data?.attributes;
-        if (attrs?.prices?.length > 0) return attrs.prices[attrs.prices.length - 1];
-        return null;
-    } catch (err) { console.error("[Gold Scraper] Error:", err.message); return null; }
-}
-
-function formatCurrency(num) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num); }
-
-async function sendGoldPriceNotification() {
-    if (!client) return;
-    const settings = getGoldSettings();
-    if (!settings.enabled) return;
-    const goldData = await getGoldPrice();
-    if (!goldData) return;
-    const message = `⭐ *INFO HARGA EMAS REAL-TIME* ⭐\n\n📅 *Waktu:* ${goldData.datetime}\n📈 *Harga Beli:* ${formatCurrency(goldData.buy_price)} / gram\n📉 *Harga Jual:* ${formatCurrency(goldData.sell_price)} / gram\n\n_Sumber: Treasury.id_`;
-    try {
-        await client.sendMessage('status@broadcast', { text: message }, { backgroundColor: '#1C1C1C', font: 3 });
-    } catch (err) { console.error("[Gold Notifier] Failed:", err.message); }
-}
-
-let goldNotifierTimeoutHandle = null;
-
-function startGoldNotifierTask() {
-    console.log("[Gold Notifier] Task scheduler initialized.");
-    scheduleNextGoldNotification();
-}
-
-function scheduleNextGoldNotification() {
-    if (goldNotifierTimeoutHandle) clearTimeout(goldNotifierTimeoutHandle);
-    const settings = getGoldSettings();
-    if (!settings.enabled) { console.log("[Gold Notifier] Disabled."); return; }
-    const now = new Date();
-    const interval = settings.interval || 24;
-    let targetTime = new Date(now);
-    if (interval === 24) { targetTime.setHours(8, 0, 0, 0); if (now >= targetTime) targetTime.setDate(targetTime.getDate() + 1); }
-    else { targetTime.setMinutes(0, 0, 0); targetTime.setHours(targetTime.getHours() + 1); if (interval > 1) { let nextHours = targetTime.getHours(); while (nextHours % interval !== 0) nextHours++; targetTime.setHours(nextHours); } }
-    const delayMs = targetTime.getTime() - now.getTime();
-    console.log(`[Gold Notifier] Next in ${Math.round(delayMs / 1000 / 60)} minutes (${targetTime.toLocaleTimeString('id-ID')})`);
-    goldNotifierTimeoutHandle = setTimeout(async () => { try { await sendGoldPriceNotification(); } catch (e) {} scheduleNextGoldNotification(); }, delayMs);
-}
-
 async function connectToWhatsApp() {
     const authDir = process.env.SESSION_DIR ? String(process.env.SESSION_DIR).trim() : 'session_auth';
     console.log(`[WA-BOT-CONNECT] Starting with zapo, sessionDir: ${authDir}`);
@@ -727,6 +646,13 @@ async function connectToWhatsApp() {
     client.on('connection', async (event) => {
         if (event.status === 'open') {
             console.log('WhatsApp connection opened successfully!');
+            const myJidRaw = client.auth?.credentials?.pnJid || client.auth?.credentials?.meJid || `${process.env.PHONE_NUMBER || '628567611130'}@s.whatsapp.net`;
+            const cleanMyNumber = myJidRaw.split('@')[0].split(':')[0].replace(/[^0-9]/g, '');
+            client.user = {
+                id: `${cleanMyNumber}@s.whatsapp.net`,
+                lid: client.auth?.credentials?.meLid || '',
+                name: client.auth?.credentials?.meDisplayName || 'Stikerin'
+            };
 
             // Helper to resolve buffer from string/url/buffer
             const resolveMediaBuffer = async (mediaInput) => {
@@ -852,7 +778,6 @@ async function connectToWhatsApp() {
             };
             await loadPlugins();
             startPluginWatcher();
-            startGoldNotifierTask();
             startPremiumExpiryScheduler(client);
             startBannedExpiryScheduler(client);
             startJoinExpiryScheduler(client, () => Array.from((global.jadibotConns || new Map()).values()).map(inst => inst.conn));
@@ -968,6 +893,100 @@ async function connectToWhatsApp() {
             }
         } catch (err) {
             console.error('[Anti-Call Error]', err.message);
+        }
+    });
+
+    // ─── GROUP MEMBERSHIP CHANGE LISTENER (WELCOME / BYE / PROMOTE / DEMOTE) ───
+    client.on('group', async (event) => {
+        try {
+            if (!event.groupJid || !event.participants?.length) return;
+            const chatJid = event.groupJid;
+            const chatData = global.db?.data?.chats?.[chatJid];
+
+            let groupMeta = null;
+            try {
+                groupMeta = await client.group.queryGroupMetadata(chatJid);
+            } catch (_) {}
+
+            const groupSubject = groupMeta?.subject || chatData?.subject || 'Grup WhatsApp';
+            const groupDesc = groupMeta?.desc || groupMeta?.description || chatData?.desc || '-';
+
+            // 1. ACTION: ADD (GABUNG / DITAMBAHKAN)
+            if (event.action === 'add') {
+                if (chatData?.welcome === false) return;
+
+                const newMembers = [];
+                for (const p of event.participants) {
+                    const userJid = typeof p === 'string' ? p : (p.jid || p.id);
+                    if (!userJid) continue;
+                    if (!event.simulate && userJid === client.user?.id) continue;
+                    newMembers.push(userJid);
+                }
+
+                if (newMembers.length === 0) return;
+
+                const userTags = newMembers.map(j => `@${j.split('@')[0].split(':')[0]}`).join(', ');
+                let welcomeTemplate = chatData?.sWelcome || `Hai kak @user 👋\nSelamat datang di *@subject*!\nSemoga betah dan patuhi peraturan grup ya 🤝\n\n*Deskripsi Grup:*\n@desc`;
+
+                const welcomeText = welcomeTemplate
+                    .replace(/@user/g, userTags)
+                    .replace(/@subject/g, groupSubject)
+                    .replace(/@desc/g, groupDesc);
+
+                await client.sendMessage(chatJid, {
+                    text: welcomeText,
+                    mentions: newMembers
+                }).catch(() => {});
+                return;
+            }
+
+            // 2. ACTION: REMOVE / PROMOTE / DEMOTE
+            for (const p of event.participants) {
+                const userJid = typeof p === 'string' ? p : (p.jid || p.id);
+                if (!userJid) continue;
+                if (!event.simulate && userJid === client.user?.id) continue;
+                const userNum = userJid.split('@')[0].split(':')[0];
+
+                if (event.action === 'remove') {
+                    if (chatData?.leave === false) continue;
+                    let byeTemplate = chatData?.sBye || `Selamat tinggal kak @user 👋\nSemoga harimu menyenangkan di luar sana!`;
+                    const byeText = byeTemplate
+                        .replace(/@user/g, `@${userNum}`)
+                        .replace(/@subject/g, groupSubject)
+                        .replace(/@desc/g, groupDesc);
+
+                    await client.sendMessage(chatJid, {
+                        text: byeText,
+                        mentions: [userJid]
+                    }).catch(() => {});
+                } else if (event.action === 'promote') {
+                    if (chatData?.detect === false) continue;
+                    let promoteTemplate = chatData?.sPromote || `🎉 *Promote Terdeteksi*\nSelamat kepada @user yang telah diangkat menjadi Admin grup *@subject*! 🫡`;
+                    const promoteText = promoteTemplate
+                        .replace(/@user/g, `@${userNum}`)
+                        .replace(/@subject/g, groupSubject)
+                        .replace(/@desc/g, groupDesc);
+
+                    await client.sendMessage(chatJid, {
+                        text: promoteText,
+                        mentions: [userJid]
+                    }).catch(() => {});
+                } else if (event.action === 'demote') {
+                    if (chatData?.detect === false) continue;
+                    let demoteTemplate = chatData?.sDemote || `📉 *Demote Terdeteksi*\nJabatan admin @user telah diturunkan menjadi Member biasa di *@subject*.`;
+                    const demoteText = demoteTemplate
+                        .replace(/@user/g, `@${userNum}`)
+                        .replace(/@subject/g, groupSubject)
+                        .replace(/@desc/g, groupDesc);
+
+                    await client.sendMessage(chatJid, {
+                        text: demoteText,
+                        mentions: [userJid]
+                    }).catch(() => {});
+                }
+            }
+        } catch (err) {
+            console.error('[Group Event Error]', err.message);
         }
     });
 

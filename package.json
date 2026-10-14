@@ -1,12 +1,14 @@
 {
   "name": "stikerinbot",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "WhatsApp Multi-Device Bot powered by api.zansxart.me running on Bun",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "bun index.js",
-    "dev": "bun --watch index.js"
+    "dev": "bun --watch index.js",
+    "setup": "bash setup.sh",
+    "test": "bun test"
   },
   "dependencies": {
     "@zapo-js/mcp-server": "^1.2.0",

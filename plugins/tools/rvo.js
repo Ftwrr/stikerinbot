@@ -1,5 +1,5 @@
 import { unwrapMessage, getContentType } from 'zapo-js';
-import { downloadMedia, restoreMediaBuffers, loadMessageById } from '../../simple.js';
+import { downloadMedia, restoreMediaBuffers, loadMessageById } from '../../lib/simple.js';
 
 const handler = async (m, { client, from, reply }) => {
     if (!m.quoted) {

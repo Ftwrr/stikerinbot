@@ -1,6 +1,6 @@
 import util from 'util';
 import { unwrapMessage, getContentType } from 'zapo-js';
-import { downloadMedia, restoreMediaBuffers, loadMessageById } from '../../simple.js';
+import { downloadMedia, restoreMediaBuffers, loadMessageById } from '../../lib/simple.js';
 
 export default async function handler(m, { client, from, reply }) {
     if (!m.quoted) {

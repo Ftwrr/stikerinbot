@@ -1,4 +1,4 @@
-import { jidNormalizedUser, loadRawMessageById } from '../../simple.js';
+import { jidNormalizedUser, loadRawMessageById } from '../../lib/simple.js';
 import { resolvePhoneNumberFromMsg } from '../../lib/lid_helper.js';
 
 function parseDays(val) {
