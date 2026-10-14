@@ -599,7 +599,7 @@ async function connectToWhatsApp() {
     const authDir = process.env.SESSION_DIR ? String(process.env.SESSION_DIR).trim() : 'session_auth';
     console.log(`[WA-BOT-CONNECT] Starting with zapo, sessionDir: ${authDir}`);
 
-    const sqlitePath = path.join('.', `zapo-${authDir}.sqlite`);
+    const sqlitePath = path.join('db', `zapo-${authDir}.sqlite`);
     const store = createStore({
         backends: {
             sqlite: createSqliteStore({ path: sqlitePath, driver: 'auto' })
@@ -1016,7 +1016,7 @@ async function connectToWhatsApp() {
         console.log(`[${mType}${rawMsg.key.fromMe ? ':fromMe' : ''}] From (${senderName} <${sender}>) In (${chatTargetName}) - ${mText ? mText.substring(0, 80) : ''}`);
 
         try {
-            const logFileName = `./chat-${AUTH_DIR_NAME}.log`;
+            const logFileName = path.join('db', `chat-${AUTH_DIR_NAME}.log`);
             fs.appendFileSync(logFileName, `[${new Date().toISOString()}] [${mType}] From: (${senderName} <${sender}>) | Chat: (${chatTargetName}) | Msg: ${mText}\n`, 'utf8');
         } catch (e) {}
 
