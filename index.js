@@ -754,18 +754,20 @@ async function connectToWhatsApp() {
                     res = await client.message.send(jid, payload, sendOpts);
                 }
                 // Text (plain string or { text: '...' })
-                else {
+                else if (typeof content === 'string' || content.text || content.conversation || content.extendedTextMessage?.text) {
                     const text = typeof content === 'string' ? content : (content.text || content.conversation || content.extendedTextMessage?.text || '');
-                    if (text) {
-                        const payload = { type: 'text', text };
-                        if (mentions.length > 0) {
-                            payload.contextInfo = payload.contextInfo || {};
-                            payload.contextInfo.mentionedJid = mentions;
-                        }
-                        res = await client.message.send(jid, payload, sendOpts);
-                    } else {
-                        console.warn('[sendMessage] Unhandled content type:', Object.keys(content));
+                    const payload = { type: 'text', text };
+                    if (mentions.length > 0) {
+                        payload.contextInfo = payload.contextInfo || {};
+                        payload.contextInfo.mentionedJid = mentions;
                     }
+                    res = await client.message.send(jid, payload, sendOpts);
+                }
+                // Interactive / Native Flow / Rich message / Raw passthrough
+                else if (content && typeof content === 'object') {
+                    res = await client.message.send(jid, content, sendOpts);
+                } else {
+                    console.warn('[sendMessage] Unhandled content type:', content);
                 }
 
                 if (res?.id) {

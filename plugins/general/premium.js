@@ -182,6 +182,15 @@ ${statusUserText}Fitur ini untuk nomor pribadi kamu agar menjadi akun Premium (V
 📲 *Cara Beli (Manual ke Owner):*
 • Ketik *.sewa* atau hubungi Owner di https://wa.me/${global.owner?.[0] || ''}`;
 
+    const buttons = [
+        { id: '.sewa', text: '💳 Sewa Bot / QRIS' },
+        { id: '.claim', text: '🎁 Klaim Harian' }
+    ];
+
+    if (m.sendButtons) {
+        return await m.sendButtons(priceText.trim(), buttons, 'Stikerin Bot • Premium Plan');
+    }
+
     await reply(priceText.trim());
 };
 

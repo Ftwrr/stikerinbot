@@ -40,7 +40,7 @@ const handler = async (m, { from, args, isOwner, reply, getPlugins }) => {
         return block;
     };
 
-    const footerPromo = `\n⚡ _Supported & Powered by https://api.zansxart.me_\n_Dapatkan REST API AI, Downloader, & Media Converter terlengkap._`;
+    const footerPromo = `\n\n⚡ _Supported & Powered by https://api.zansxart.me_\n_Dapatkan REST API AI, Downloader, & Media Converter terlengkap._`;
 
     // 1. KATEGORI SPESIFIK
     if (requestedCategory && categories.has(requestedCategory)) {
@@ -67,7 +67,17 @@ const handler = async (m, { from, args, isOwner, reply, getPlugins }) => {
         summaryText += `• *.menu ${catName.toLowerCase()}* (${cmdList.length} fitur)\n`;
     }
     summaryText += `• *.menu all* (Tampilkan semua)\n\n`;
-    summaryText += `_Ketik *.menu [kategori]* untuk membuka daftar perintah kategori tersebut._` + footerPromo;
+    summaryText += `_Ketik *.menu [kategori]* atau klik tombol di bawah._` + footerPromo;
+
+    const quickButtons = [
+        { id: '.menu all', text: '📖 Semua Menu' },
+        { id: '.claim', text: '🎁 Klaim Limit' },
+        { id: '.ping', text: '⚡ Ping Status' }
+    ];
+
+    if (m.sendButtons) {
+        return await m.sendButtons(summaryText.trim(), quickButtons, 'Stikerin Bot • Menu Utama');
+    }
 
     await reply(summaryText.trim());
 };

@@ -106,4 +106,39 @@ describe("Message Serializer (smsg) and LID Quoted Handling", () => {
         expect(sentContent.text).toBe("Daftar Menu");
         expect(sentOpts.quoted.key.id).toBe("INCOMING_MSG_1");
     });
+
+    test("m.sendButtons builds interactiveMessage native flow", async () => {
+        const { smsg } = await import("../lib/simple.js");
+
+        let sentContent = null;
+        const fakeClient = {
+            sendMessage: async (jid, content) => {
+                sentContent = content;
+                return { id: "BTN_1" };
+            }
+        };
+
+        const m = await smsg(fakeClient, {
+            key: { remoteJid: "6285157336614@s.whatsapp.net", id: "IN_2", fromMe: false },
+            message: { conversation: ".menu" }
+        });
+
+        await m.sendButtons("Pilih menu", [{ id: ".menu all", text: "Semua" }], "Footer");
+        expect(sentContent.interactiveMessage.body.text).toBe("Pilih menu");
+        expect(sentContent.interactiveMessage.footer.text).toBe("Footer");
+
+        const btn = sentContent.interactiveMessage.nativeFlowMessage.buttons[0];
+        expect(btn.name).toBe("quick_reply");
+        expect(JSON.parse(btn.buttonParamsJson).id).toBe(".menu all");
+    });
+
+    test("readRichReply extracts native flow response id", async () => {
+        const { readRichReply } = await import("../lib/rich_message.js");
+        const reply = readRichReply({
+            interactiveResponseMessage: {
+                nativeFlowResponseMessage: { name: "quick_reply", paramsJson: JSON.stringify({ id: ".claim" }) }
+            }
+        });
+        expect(reply.id).toBe(".claim");
+    });
 });

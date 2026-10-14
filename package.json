@@ -1,6 +1,6 @@
 {
   "name": "stikerinbot",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "WhatsApp Multi-Device Bot powered by api.zansxart.me running on Bun",
   "main": "index.js",
   "type": "module",

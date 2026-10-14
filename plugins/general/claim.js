@@ -26,7 +26,17 @@ const handler = async (m, { reply }) => {
     user.limit = (user.limit || 0) + CLAIM_LIMIT;
     user.lastClaim = now;
 
-    await reply(`🎁 *KLAIM HARIAN BERHASIL!*\n\n• Mendapatkan : *+${CLAIM_LIMIT} Limit*\n• Total Limit  : *${user.limit} Limit*\n\n_Kembali lagi besok untuk klaim limit harianmu!_`);
+    const successText = `🎁 *KLAIM HARIAN BERHASIL!*\n\n• Mendapatkan : *+${CLAIM_LIMIT} Limit*\n• Total Limit  : *${user.limit} Limit*\n\n_Kembali lagi besok untuk klaim limit harianmu!_`;
+    const buttons = [
+        { id: '.menu', text: '📖 Menu Bot' },
+        { id: '.buylimit 1', text: '⚡ Beli Limit' }
+    ];
+
+    if (m.sendButtons) {
+        return await m.sendButtons(successText, buttons, 'Stikerin Bot • Daily Claim');
+    }
+
+    await reply(successText);
 };
 
 handler.command = ['claim', 'daily', 'klaim', 'hadiah'];
