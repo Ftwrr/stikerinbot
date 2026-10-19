@@ -17,11 +17,11 @@ const handler = async (m, { client, from, reply }) => {
     try {
         const buffer = await q.download();
         if (actualType === 'sticker') {
-            const exifBuffer = await addExif(buffer, "stikerin.my.id");
+            const exifBuffer = await addExif(buffer, "AMBATRON");
             await client.sendMessage(from, { sticker: exifBuffer }, { quoted: { key: m.key } });
         } else {
             const webpBuffer = await convertToWebp(buffer, actualType);
-            const exifBuffer = await addExif(webpBuffer, "stikerin.my.id");
+            const exifBuffer = await addExif(webpBuffer, "AMBATRON");
             await client.sendMessage(from, { sticker: exifBuffer }, { quoted: { key: m.key } });
         }
     } catch (err) {

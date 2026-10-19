@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ==============================================================
-# StikerinBot - Easy Setup & Interactive Installer
+# AMBATRON - Easy Setup & Interactive Installer
 # ==============================================================
 
 set -e
@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 
 clear
 echo -e "${CYAN}======================================================${NC}"
-echo -e "${CYAN}         🤖 STIKERIN BOT - SETUP & INSTALLER         ${NC}"
+echo -e "${CYAN}            🤖 AMBATRON - SETUP & INSTALLER          ${NC}"
 echo -e "${CYAN}======================================================${NC}"
 echo ""
 

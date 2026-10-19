@@ -1,10 +1,10 @@
 module.exports = {
   apps: [
     {
-      name: "stikerinbot",
+      name: "ambatron",
       script: "./index.js",
       interpreter: "bun",
-      cwd: "/opt/stikerinbot",
+      cwd: "/opt/ambatron",
       env: {
         SESSION_DIR: "session_auth"
       }

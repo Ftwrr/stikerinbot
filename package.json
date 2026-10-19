@@ -1,7 +1,7 @@
 {
-  "name": "stikerinbot",
+  "name": "ambatron",
   "version": "2.2.0",
-  "description": "WhatsApp Multi-Device Bot powered by api.zansxart.me running on Bun",
+  "description": "WhatsApp Multi-Device Bot AMBATRON running on Bun",
   "main": "index.js",
   "type": "module",
   "scripts": {

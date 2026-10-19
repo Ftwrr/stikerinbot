@@ -7,11 +7,11 @@ const handler = async (m, { client, from, reply }) => {
     }
 
     const cleanNum = String(ownerNum).replace(/[^0-9]/g, '');
-    const displayName = 'Owner Stikerin Bot';
+    const displayName = 'Owner AMBATRON';
     const vcard = 'BEGIN:VCARD\n'
         + 'VERSION:3.0\n'
         + `FN:${displayName}\n`
-        + 'ORG:Stikerin Bot\n'
+        + 'ORG:AMBATRON\n'
         + `TEL;type=CELL;type=VOICE;waid=${cleanNum}:+${cleanNum}\n`
         + 'END:VCARD';
 

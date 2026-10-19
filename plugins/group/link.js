@@ -4,9 +4,9 @@ const OFFICIAL_GROUP_2 = 'https://chat.whatsapp.com/Bek3XeV1a432DMf4xuenRU';
 const handler = async (m, { client, from, reply }) => {
     // 1. JIKA DI CHAT PRIBADI (PC / DM)
     if (!m.isGroup) {
-        const txt = `🌐 *GRUP RESMI STIKERIN BOT*
+        const txt = `🌐 *GRUP RESMI AMBATRON*
 
-Gabung ke grup WhatsApp resmi Stikerin Bot untuk menikmati fitur tanpa batas limit & informasi terbaru:
+Gabung ke grup WhatsApp resmi AMBATRON untuk menikmati fitur terbaru & informasi update:
 
 • *Grup 1:* ${OFFICIAL_GROUP_1}
 • *Grup 2:* ${OFFICIAL_GROUP_2}
@@ -39,6 +39,6 @@ _Silakan bergabung ke salah satu grup di atas!_`;
 
 handler.command = ['link', 'linkgc', 'linkgroup', 'gclink', 'gruplink'];
 handler.category = 'Group';
-handler.desc = 'Mengambil link undangan grup WhatsApp atau link grup resmi Stikerin jika di PC';
+handler.desc = 'Mengambil link undangan grup WhatsApp atau link grup resmi AMBATRON jika di PC';
 handler.limit = false;
 export default handler;

@@ -311,11 +311,11 @@ async function handleStickerCommand(msg, customClient = null) {
     try {
         const buffer = await downloadMsgMedia(msg, actualType);
         if (actualType === 'sticker') {
-            const exifBuffer = await addExif(buffer, "stikerin.my.id");
+            const exifBuffer = await addExif(buffer, "AMBATRON");
             await (customClient || client).sendMessage(from, { sticker: exifBuffer }, { quoted: quotedMsg });
         } else {
             const webpBuffer = await convertToWebp(buffer, actualType);
-            const exifBuffer = await addExif(webpBuffer, "stikerin.my.id");
+            const exifBuffer = await addExif(webpBuffer, "AMBATRON");
             await (customClient || client).sendMessage(from, { sticker: exifBuffer }, { quoted: quotedMsg });
         }
     } catch (err) {
@@ -370,7 +370,7 @@ async function handleQcCommand(msg) {
         } catch (e) {}
         const pngBuffer = await generateQcSticker(targetName, caption, ppBuffer, mediaBuffer);
         const webpSticker = await convertToWebp(pngBuffer, 'image');
-        const exifBuffer = await addExif(webpSticker, "stikerin.my.id");
+        const exifBuffer = await addExif(webpSticker, "AMBATRON");
         await client.sendMessage(from, { sticker: exifBuffer }, { quoted: quotedMsg });
     } catch (err) {
         console.error('[QC Error]', err);
@@ -619,7 +619,7 @@ async function connectToWhatsApp() {
             client.user = {
                 id: `${cleanMyNumber}@s.whatsapp.net`,
                 lid: client.auth?.credentials?.meLid || '',
-                name: client.auth?.credentials?.meDisplayName || 'Stikerin'
+                name: client.auth?.credentials?.meDisplayName || 'AMBATRON'
             };
 
             // Helper to resolve buffer from string/url/buffer

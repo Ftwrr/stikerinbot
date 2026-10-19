@@ -1,12 +1,6 @@
-# Stikerin Bot 🚀
+# AMBATRON 🚀
 
-Bot WhatsApp modern, ringan, dan cepat berbasis engine **zapo-js** dengan runtime **Bun**, difokuskan untuk integrasi fitur REST API **[api.zansxart.me](https://api.zansxart.me)**.
-
-<p align="center">
-  <a href="https://saweria.co/ariffb" target="_blank">
-    <img src="https://img.shields.io/badge/Saweria-Dukung%20Kreator-orange?style=for-the-badge&logo=coffee" alt="Dukung via Saweria" />
-  </a>
-</p>
+Bot WhatsApp modern, ringan, dan cepat berbasis engine **zapo-js** dengan runtime **Bun**.
 
 ---
 
@@ -105,7 +99,7 @@ pm2 save
 pm2 startup
 
 # Monitoring log real-time
-pm2 logs stikerinbot
+pm2 logs ambatron
 ```
 
 ### Menjalankan Unit Test

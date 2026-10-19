@@ -52,7 +52,7 @@ const handler = async (m, { reply }) => {
     ];
 
     if (m.sendButtons) {
-        return await m.sendButtons(successText, buttons, 'Stikerin Bot • Daily Claim');
+        return await m.sendButtons(successText, buttons, 'AMBATRON • Daily Claim');
     }
 
     await reply(successText);

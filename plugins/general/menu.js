@@ -74,7 +74,7 @@ const handler = async (m, { from, args, isOwner, reply, getPlugins }) => {
     ];
 
     if (m.sendButtons) {
-        return await m.sendButtons(summaryText.trim(), quickButtons, 'Stikerin Bot • Menu Utama');
+        return await m.sendButtons(summaryText.trim(), quickButtons, 'AMBATRON • Menu Utama');
     }
 
     await reply(summaryText.trim());
