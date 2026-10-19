@@ -1,4 +1,4 @@
-const CLAIM_LIMIT = 5;
+const CLAIM_EXP = 100;
 const COOLDOWN_HOURS = 24;
 const COOLDOWN_MS = COOLDOWN_HOURS * 60 * 60 * 1000;
 
@@ -11,6 +11,7 @@ function formatRemaining(ms) {
 }
 
 const handler = async (m, { reply }) => {
+    if (!global.db?.data?.users) return reply('Database pengguna belum siap.');
     const user = global.db.data.users[m.sender];
     if (!user) return reply('User belum terdaftar di database.');
 
@@ -23,13 +24,31 @@ const handler = async (m, { reply }) => {
         return reply(`⏳ Kamu sudah melakukan klaim hari ini!\nSilakan tunggu *${formatRemaining(remaining)}* lagi untuk klaim berikutnya.`);
     }
 
-    user.limit = (user.limit || 0) + CLAIM_LIMIT;
+    user.exp = (user.exp || 0) + CLAIM_EXP;
     user.lastClaim = now;
 
-    const successText = `🎁 *KLAIM HARIAN BERHASIL!*\n\n• Mendapatkan : *+${CLAIM_LIMIT} Limit*\n• Total Limit  : *${user.limit} Limit*\n\n_Kembali lagi besok untuk klaim limit harianmu!_`;
+    const currentLevel = user.level || 1;
+    const neededExp = currentLevel * 1000;
+    let levelUpText = '';
+
+    if (user.exp >= neededExp) {
+        user.level = currentLevel + 1;
+        levelUpText = `\n🆙 *LEVEL UP!* Selamat, kamu naik ke *Level ${user.level}*!`;
+    }
+
+    global.db.scheduleSave();
+
+    const successText = `🎁 *KLAIM HARIAN BERHASIL!*\n\n` +
+        `• Bonus Didapat : *+${CLAIM_EXP} EXP*\n` +
+        `• Level Sekarang: *${user.level || 1}*\n` +
+        `• Total EXP     : *${user.exp.toLocaleString('id-ID')} EXP*` +
+        levelUpText +
+        `\n\n_Kembali lagi besok untuk klaim bonus harian berikutnya!_`;
+
     const buttons = [
         { id: '.menu', text: '📖 Menu Bot' },
-        { id: '.buylimit 1', text: '⚡ Beli Limit' }
+        { id: '.profile', text: '📊 Cek Profil' },
+        { id: '.lb', text: '🏆 Leaderboard' }
     ];
 
     if (m.sendButtons) {
@@ -41,6 +60,5 @@ const handler = async (m, { reply }) => {
 
 handler.command = ['claim', 'daily', 'klaim', 'hadiah'];
 handler.category = 'General';
-handler.limit = false;
-handler.desc = 'Klaim bonus 5 limit harian setiap 24 jam';
+handler.desc = 'Klaim bonus 100 EXP harian setiap 24 jam';
 export default handler;

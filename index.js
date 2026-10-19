@@ -20,9 +20,7 @@ import { smsg } from './lib/simple.js';
 import { getRichHandler } from './lib/rich_handler.js';
 import { handleDeadPlayerChat, restoreWwGames } from './lib/werewolf.js';
 import { getBotSettings } from './lib/settings.js';
-import { startPremiumExpiryScheduler } from './lib/premium_scheduler.js';
 import { startBannedExpiryScheduler } from './lib/banned_scheduler.js';
-import { startJoinExpiryScheduler } from './lib/join_scheduler.js';
 import { evaluateAntiCall } from './lib/anti_call.js';
 import { messageCache } from './lib/message_cache.js';
 
@@ -758,14 +756,9 @@ async function connectToWhatsApp() {
             };
             await loadPlugins();
             startPluginWatcher();
-            startPremiumExpiryScheduler(client);
             startBannedExpiryScheduler(client);
-            startJoinExpiryScheduler(client, () => Array.from((global.jadibotConns || new Map()).values()).map(inst => inst.conn));
             setTimeout(() => {
                 restoreClonedSessions().catch(console.error);
-                import('./lib/game_manager.js').then(({ restoreActiveGames }) => {
-                    restoreActiveGames(client);
-                }).catch(() => {});
                 try { restoreWwGames(client); } catch (e) { console.error('[Werewolf Restore]', e.message); }
             }, 3000);
         } else if (event.status === 'close') {
@@ -868,7 +861,7 @@ async function connectToWhatsApp() {
                         : `Akun Anda otomatis di-banned selama *30 Hari* (hingga *${expDateStr}*).`;
 
                     await client.sendMessage(callerJid, {
-                        text: `⚠️ *ANTI-CALL AKTIF!*\n\nMaaf, bot tidak menerima panggilan telepon ataupun video.\n${tambahMsg}\n\nSetelah masa banned selesai, akun Anda akan otomatis di-unban oleh sistem.\n\n💡 *Mau cepat di-unban sekarang tanpa menunggu?*\nKetik *.unban* untuk buka banned instan secara otomatis via QRIS (Rp 2.000).`
+                        text: `⚠️ *ANTI-CALL AKTIF!*\n\nMaaf, bot tidak menerima panggilan telepon ataupun video.\n${tambahMsg}\n\nSetelah masa banned selesai, akun Anda akan otomatis di-unban oleh sistem.`
                     }).catch(() => {});
                 }
             }
@@ -880,6 +873,9 @@ async function connectToWhatsApp() {
     // ─── GROUP MEMBERSHIP CHANGE LISTENER (WELCOME / BYE / PROMOTE / DEMOTE) ───
     client.on('group', async (event) => {
         try {
+            const botSettings = getBotSettings();
+            if (!botSettings.publicMode || !botSettings.groupMode) return;
+
             if (!event.groupJid || !event.participants?.length) return;
             const chatJid = event.groupJid;
             const chatData = global.db?.data?.chats?.[chatJid];

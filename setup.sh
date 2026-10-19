@@ -99,9 +99,8 @@ SUPABASE_URL=${SUPABASE_URL}
 SUPABASE_KEY=${SUPABASE_KEY}
 
 # ==========================================
-# RATE LIMIT & ANTI-SPAM
+# ANTI-SPAM COOLDOWN
 # ==========================================
-PC_DELAY_MS=5000
 COMMAND_COOLDOWN_MS=1500
 EOF
 

@@ -1,13 +1,6 @@
 const INVITE_REGEX = /chat\.whatsapp\.com\/([0-9A-Za-z]{20,24})/i;
-const DEFAULT_DAYS = 30;
 
-function parseDays(val) {
-    if (!val) return DEFAULT_DAYS;
-    const n = parseInt(val, 10);
-    return isNaN(n) || n <= 0 ? DEFAULT_DAYS : n;
-}
-
-const handler = async (m, { client, text, args, isOwner, reply }) => {
+const handler = async (m, { client, text, isOwner, reply }) => {
     if (!isOwner) {
         return reply('⛔ Perintah ini khusus untuk Owner bot!');
     }
@@ -16,13 +9,10 @@ const handler = async (m, { client, text, args, isOwner, reply }) => {
     const match = input.match(INVITE_REGEX);
 
     if (!match) {
-        return reply(`⚠️ Masukkan tautan/link undangan grup WhatsApp yang valid!\n\n*Contoh:*\n• *.join https://chat.whatsapp.com/L1234567890ABCDEF12345*\n• *.join https://chat.whatsapp.com/L1234567890ABCDEF12345 30* (Custom hari)`);
+        return reply(`⚠️ Masukkan tautan/link undangan grup WhatsApp yang valid!\n\n*Contoh:*\n• *.join https://chat.whatsapp.com/L1234567890ABCDEF12345*`);
     }
 
     const inviteCode = match[1];
-    const days = parseDays(args[1]);
-    const durationMs = days * 24 * 60 * 60 * 1000;
-    const expiryTime = Date.now() + durationMs;
 
     try {
         if (!client?.group?.joinGroupViaInvite) {
@@ -36,31 +26,17 @@ const handler = async (m, { client, text, args, isOwner, reply }) => {
             return reply('✅ Permintaan bergabung grup telah dikirimkan / diproses.');
         }
 
-        // Simpan data sewa grup di database
         if (!global.db.data.chats[groupJid]) {
             global.db.data.chats[groupJid] = {};
         }
-
-        global.db.data.chats[groupJid].joinExpiry = expiryTime;
         global.db.data.chats[groupJid].joinedAt = Date.now();
-        global.db.data.chats[groupJid].durationDays = days;
-        global.db.data.chats[groupJid].warnings = {};
         global.db.scheduleSave();
 
-        const expDate = new Date(expiryTime).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            timeZone: 'Asia/Jakarta'
-        });
+        await reply(`🎉 *BOT BERHASIL MASUK GRUP!*\n\n• Target JID : *${groupJid}*`);
 
-        // Kirim notifikasi konfirmasi ke chat pemanggil
-        await reply(`🎉 *BOT BERHASIL MASUK GRUP!*\n\n• Target JID : *${groupJid}*\n• Masa Sewa  : *${days} Hari*\n• Expired Pada: *${expDate}*\n\n_Bot akan otomatis memberikan notifikasi countdown (H-3, H-2, H-1, 1 jam, 1 menit) dan keluar otomatis saat waktu habis._`);
-
-        // Kirim salam perkenalan ke dalam grup yang dimasuki
         try {
             await client.sendMessage(groupJid, {
-                text: `👋 *Halo semuanya!*\n\nBot telah diundang masuk oleh Owner untuk aktif selama *${days} Hari* (Hingga ${expDate}).\nKetik *.menu* untuk melihat daftar fitur yang tersedia.`
+                text: `👋 *Halo semuanya!*\n\nBot telah berhasil bergabung ke dalam grup.\nKetik *.menu* untuk melihat daftar fitur yang tersedia.`
             });
         } catch (e) {}
 
@@ -72,6 +48,6 @@ const handler = async (m, { client, text, args, isOwner, reply }) => {
 
 handler.command = ['join', 'joingc', 'masuk'];
 handler.category = 'Owner';
-handler.desc = 'Memasukkan bot ke grup dengan auto-leave timer 30 hari';
+handler.desc = 'Memasukkan bot ke grup via link undangan';
 handler.owner = true;
 export default handler;

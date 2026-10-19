@@ -69,7 +69,7 @@ const handler = async (m, { from, args, isOwner, reply, getPlugins }) => {
 
     const quickButtons = [
         { id: '.menu all', text: '📖 Semua Menu' },
-        { id: '.claim', text: '🎁 Klaim Limit' },
+        { id: '.claim', text: '🎁 Klaim Harian' },
         { id: '.ping', text: '⚡ Ping Status' }
     ];
 
