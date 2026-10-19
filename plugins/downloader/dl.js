@@ -47,7 +47,7 @@ const handler = async (m, { client, from, text, args, command, reply }) => {
     await reply('❌ Gagal mengunduh media dari link tersebut via api.zansxart.me. Pastikan link bersifat publik.');
 };
 
-handler.command = ['dl', 'download', 'tt', 'tiktok', 'ig', 'instagram', 'fb', 'facebook', 'tw', 'twitter', 'x', 'capcut', 'pin', 'pindl', 'spotify', 'yt', 'ytmp3', 'ytmp4', 'youtube'];
+handler.command = ['dl', 'download', 'tt', 'tiktok', 'ig', 'instagram', 'fb', 'facebook', 'tw', 'twitter', 'x', 'capcut', 'pin', 'pindl', 'yt', 'ytmp3', 'ytmp4', 'youtube'];
 handler.category = 'Downloader';
-handler.desc = 'Download video/foto/audio TikTok, IG, FB, X, CapCut, Spotify, YouTube via api.zansxart.me';
+handler.desc = 'Download video/foto/audio TikTok, IG, FB, X, CapCut, YouTube via api.zansxart.me';
 export default handler;
