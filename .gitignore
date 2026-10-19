@@ -1,50 +1,52 @@
-sessions# Node.js Modules
-node_modules
+# Dependencies & Package Managers
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
 
-# important session
-*.data.json
-
-# vim state
-.*.swp
-
-# Databases
-database.json
-*_database.json
-
-# Okay
-# config.js
-tmp/*
-
-# Google Drive Credentials?
+# Environment & Credentials
+.env
+.env.local
+.env.*.local
+!.env.example
 credentials.json
 token.json
 
-
-# source code inspecting purposes
-waweb
-# planned
-web-client
-package-lock.json
-
-# Vscode Settings
-.vscode
-# Local config & secret
-AGENTS.md
+# WhatsApp Sessions & Auth
+session_auth/
 sessions/
 auth_*
 .auth*
-*.sqlite*
-*.log
-tmp/
-node_modules/
+*.data.json
 deepseek_sessions/
 message-cache/
 settings-*.json
-zapo-*.sqlite*
 
-# API Secrets & Config
-.env
-
-# Database and runtime json
+# Databases & Cache
 db/
+*.sqlite
 *.sqlite*
+database.json
+*_database.json
+
+# Temporary & Runtime files
+tmp/*
+!tmp/file
+!tmp/.gitkeep
+._tmp_*
+._*
+*.log
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+.*.swp
+AGENTS.md
+waweb
+web-client
