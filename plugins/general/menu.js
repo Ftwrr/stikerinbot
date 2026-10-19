@@ -40,14 +40,12 @@ const handler = async (m, { from, args, isOwner, reply, getPlugins }) => {
         return block;
     };
 
-    const footerPromo = `\n\n⚡ _Supported & Powered by https://api.zansxart.me_\n_Dapatkan REST API AI, Downloader, & Media Converter terlengkap._`;
-
     // 1. KATEGORI SPESIFIK
     if (requestedCategory && categories.has(requestedCategory)) {
         const cmdList = categories.get(requestedCategory);
         let catText = `📖 *MENU KATEGORI: ${requestedCategory}*\n\n`;
         catText += formatCategoryBlock(requestedCategory, cmdList);
-        catText += `_Ketik *.menu* untuk melihat semua kategori._` + footerPromo;
+        catText += `_Ketik *.menu* untuk melihat semua kategori._`;
         return reply(catText.trim());
     }
 
@@ -57,7 +55,7 @@ const handler = async (m, { from, args, isOwner, reply, getPlugins }) => {
         for (const [catName, cmdList] of categories.entries()) {
             allText += formatCategoryBlock(catName, cmdList);
         }
-        allText += `_Ketik nama perintah dengan awalan titik (contoh: *.ping*)_` + footerPromo;
+        allText += `_Ketik nama perintah dengan awalan titik (contoh: *.ping*)_`;
         return reply(allText.trim());
     }
 
@@ -67,7 +65,7 @@ const handler = async (m, { from, args, isOwner, reply, getPlugins }) => {
         summaryText += `• *.menu ${catName.toLowerCase()}* (${cmdList.length} fitur)\n`;
     }
     summaryText += `• *.menu all* (Tampilkan semua)\n\n`;
-    summaryText += `_Ketik *.menu [kategori]* atau klik tombol di bawah._` + footerPromo;
+    summaryText += `_Ketik *.menu [kategori]* atau klik tombol di bawah._`;
 
     const quickButtons = [
         { id: '.menu all', text: '📖 Semua Menu' },

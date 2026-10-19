@@ -326,38 +326,6 @@ async function handleStickerCommand(msg, customClient = null) {
     }
 }
 
-async function handleBratCommand(msg, textParam) {
-    const from = msg.key.remoteJidAlt || msg.key.remoteJid;
-    const quotedMsg = { ...msg, key: { ...msg.key, remoteJid: from } };
-    let targetText = textParam ? textParam.trim() : '';
-    if (targetText.length === 0) {
-        const messageContent = getRealMessage(msg.message);
-        const quoted = messageContent?.extendedTextMessage?.contextInfo?.quotedMessage;
-        if (quoted) {
-            const resolvedQuoted = getRealMessage(quoted);
-            targetText = resolvedQuoted?.conversation || resolvedQuoted?.extendedTextMessage?.text || resolvedQuoted?.imageMessage?.caption || resolvedQuoted?.videoMessage?.caption || '';
-            targetText = targetText.trim();
-        }
-    }
-    if (targetText.length === 0) {
-        return client.sendMessage(from, { text: 'Format salah! Gunakan *.b [teks]* atau reply pesan teks dengan *.b* untuk membuat stiker brat.' }, { quoted: quotedMsg });
-    }
-    if (targetText.length > 75) {
-        return client.sendMessage(from, { text: 'Teks terlalu panjang! Maksimal 75 karakter.' }, { quoted: quotedMsg });
-    }
-    try {
-        console.log(`[Brat] Generating sticker for: ${targetText}`);
-        const url = `https://stikerin.my.id/api/v1/brat?apikey=sk_bfd2e1a6bcac90f4c0ce95790e26259f&text=${encodeURIComponent(targetText)}`;
-        const res = await axios.get(url, { responseType: 'arraybuffer', headers: { 'User-Agent': 'Mozilla/5.0' } });
-        const webpBuffer = await convertToWebp(Buffer.from(res.data), 'image');
-        const exifBuffer = await addExif(webpBuffer, "stikerin.my.id");
-        await client.sendMessage(from, { sticker: exifBuffer }, { quoted: quotedMsg });
-    } catch (err) {
-        console.error("Error generating brat sticker:", err);
-        await client.sendMessage(from, { text: '❌ Gagal membuat stiker brat!' }, { quoted: quotedMsg });
-    }
-}
-
 async function handleQcCommand(msg) {
     const from = msg.key.remoteJid;
     const quotedMsg = { ...msg, key: { ...msg.key, remoteJid: from } };

@@ -80,12 +80,7 @@ else
 fi
 echo -e "${GREEN}✓ Nomor Owner: ${OWNER_NUMBER}${NC}\n"
 
-# 5. Input API Key Zansxart
-echo -e "${BLUE}API Key dari https://api.zansxart.me (Tekan Enter jika ingin diisi nanti):${NC}"
-read -rp "Zans API Key: " ZANS_KEY
-ZANS_API_KEY="${ZANS_KEY:-your_api_key_here}"
-
-# 6. Generate file .env
+# 5. Generate file .env
 ENV_FILE=".env"
 cat <<EOF > "$ENV_FILE"
 # ==========================================
@@ -104,11 +99,6 @@ SUPABASE_URL=${SUPABASE_URL}
 SUPABASE_KEY=${SUPABASE_KEY}
 
 # ==========================================
-# REST API KEYS
-# ==========================================
-ZANS_API_KEY=${ZANS_API_KEY}
-
-# ==========================================
 # RATE LIMIT & ANTI-SPAM
 # ==========================================
 PC_DELAY_MS=5000
@@ -117,7 +107,7 @@ EOF
 
 echo -e "${GREEN}✓ File .env berhasil dibuat!${NC}\n"
 
-# 7. Install Dependencies
+# 6. Install Dependencies
 echo -e "${YELLOW}📦 Menginstal dependensi proyek...${NC}"
 bun install --frozen-lockfile 2>/dev/null || bun install
 echo -e "${GREEN}✓ Dependensi berhasil dipasang!${NC}\n"
