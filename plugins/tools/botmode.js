@@ -112,7 +112,8 @@ _Perintah Pengaturan (Khusus Owner):_
 };
 
 handler.command = ['botmode', 'mode', 'self', 'public', 'statusbot', 'anticall'];
-handler.category = 'Tools';
+handler.help = ['mode <self/public>'];
+handler.tags = ['tools'];
 handler.limit = false;
 handler.desc = 'Pengaturan mode bot (grup, publik, autoread, anticall)';
 handler.owner = false;

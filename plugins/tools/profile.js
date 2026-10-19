@@ -31,6 +31,7 @@ const handler = async (m, { isOwner, reply }) => {
 };
 
 handler.command = ['profile', 'me', 'level', 'exp'];
-handler.category = 'Tools';
+handler.help = ['profile'];
+handler.tags = ['tools'];
 handler.desc = 'Cek level, EXP, dan profil pengguna';
 export default handler;

@@ -42,7 +42,8 @@ const handler = async (m, { client, from, text, args, isOwner, reply }) => {
 };
 
 handler.command = ['ban', 'banned', 'banuser'];
-handler.category = 'Owner';
+handler.help = ['ban @user'];
+handler.tags = ['owner'];
 handler.desc = 'Memblokir akses pengguna dari menggunakan perintah bot';
 handler.owner = true;
 export default handler;

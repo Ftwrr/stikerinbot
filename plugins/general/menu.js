@@ -5,28 +5,50 @@ const handler = async (m, { from, args, isOwner, reply, getPlugins }) => {
     const categories = new Map();
 
     for (const plugin of plugins) {
-        if (!Array.isArray(plugin.command) || plugin.command.length === 0) continue;
         if (plugin.owner && !isOwner) continue;
 
-        let cat = plugin.category;
-        if (!cat && plugin.filePath) {
+        // Tentukan kategori dari plugin.tags atau nama folder parent plugin
+        let rawTags = plugin.tags;
+        if (!rawTags && plugin.filePath) {
             const rel = path.relative(path.join(process.cwd(), 'plugins'), plugin.filePath);
             const dir = path.dirname(rel);
-            cat = dir && dir !== '.' ? dir : 'General';
+            rawTags = dir && dir !== '.' ? dir : 'General';
         }
-        if (!cat) cat = 'General';
-        cat = cat.toUpperCase();
+        if (!rawTags) rawTags = 'General';
 
-        if (!categories.has(cat)) {
-            categories.set(cat, []);
+        const tagList = Array.isArray(rawTags) ? rawTags : [rawTags];
+
+        // Tentukan command list dari plugin.help atau plugin.command
+        let helpList = [];
+        if (Array.isArray(plugin.help) && plugin.help.length > 0) {
+            helpList = plugin.help;
+        } else if (typeof plugin.help === 'string' && plugin.help.trim()) {
+            helpList = [plugin.help.trim()];
+        } else if (Array.isArray(plugin.command) && plugin.command.length > 0) {
+            helpList = [plugin.command[0]];
         }
 
-        const primaryCmd = plugin.command[0];
+        if (helpList.length === 0) continue;
+
         const desc = plugin.desc || '';
-        categories.get(cat).push({
-            cmd: primaryCmd,
-            desc
-        });
+
+        for (const tag of tagList) {
+            const catName = String(tag).trim().toUpperCase();
+            if (!catName) continue;
+
+            if (!categories.has(catName)) {
+                categories.set(catName, []);
+            }
+
+            for (const item of helpList) {
+                // Bersihkan prefix jika sudah ada di teks item
+                const cleanItem = String(item).replace(/^\.\s*/, '');
+                categories.get(catName).push({
+                    cmd: cleanItem,
+                    desc
+                });
+            }
+        }
     }
 
     const requestedCategory = (args[0] || '').trim().toUpperCase();
@@ -81,7 +103,8 @@ const handler = async (m, { from, args, isOwner, reply, getPlugins }) => {
 };
 
 handler.command = ['menu', 'list', 'help'];
-handler.category = 'General';
+handler.help = ['menu [kategori]'];
+handler.tags = ['general'];
 handler.limit = false;
 handler.desc = 'Menampilkan menu perintah per kategori';
 export default handler;

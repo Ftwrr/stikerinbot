@@ -38,7 +38,9 @@ const handler = async (m, { client, from, text, isOwner, reply }) => {
 };
 
 handler.command = ['unban', 'unbanned', 'lepasban', 'bukaunban'];
-handler.category = 'Owner';
+handler.help = ['unban @user'];
+handler.tags = ['owner'];
 handler.desc = 'Membuka status banned akun (Khusus Owner)';
+handler.owner = true;
 handler.limit = false;
 export default handler;

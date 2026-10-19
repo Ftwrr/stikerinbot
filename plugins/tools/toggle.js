@@ -101,7 +101,8 @@ Pengaturan bot hanya dapat diubah oleh Owner.`);
 };
 
 handler.command = ['on', 'off'];
-handler.category = 'Tools';
+handler.help = ['on <fitur>', 'off <fitur>'];
+handler.tags = ['tools'];
 handler.limit = false;
 handler.desc = 'Nyalakan/matikan fitur (grup, bot, status, autoread, anticall)';
 export default handler;

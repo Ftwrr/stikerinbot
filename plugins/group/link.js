@@ -38,7 +38,8 @@ _Silakan bergabung ke salah satu grup di atas!_`;
 };
 
 handler.command = ['link', 'linkgc', 'linkgroup', 'gclink', 'gruplink'];
-handler.category = 'Group';
+handler.help = ['link'];
+handler.tags = ['group'];
 handler.desc = 'Mengambil link undangan grup WhatsApp atau link grup resmi AMBATRON jika di PC';
 handler.limit = false;
 export default handler;

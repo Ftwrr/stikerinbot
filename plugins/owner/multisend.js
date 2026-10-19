@@ -234,7 +234,8 @@ _Maksimal 20 nomor per panggilan. Bot otomatis memvalidasi apakah nomor terdafta
 };
 
 handler.command = ['pinjol', 'multisend', 'kirimpesan', 'sendto'];
-handler.category = 'Owner';
+handler.help = ['multisend <nomor> <teks>'];
+handler.tags = ['owner'];
 handler.desc = 'Mengirim pesan/reply media ke daftar nomor (maks 20 nomor) dengan validasi akun WhatsApp';
 handler.owner = true;
 export default handler;

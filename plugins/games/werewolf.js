@@ -238,7 +238,8 @@ const handler = async (m, { client, from, text, args, command, reply }) => {
 };
 
 handler.command = ['ww', 'werewolf'];
-handler.category = 'Games';
+handler.help = ['werewolf'];
+handler.tags = ['game'];
 handler.desc = 'Game Werewolf (WW) interaktif khusus grup';
 
 handler.limit = false;

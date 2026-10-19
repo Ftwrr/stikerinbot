@@ -47,7 +47,8 @@ const handler = async (m, { client, text, isOwner, reply }) => {
 };
 
 handler.command = ['join', 'joingc', 'masuk'];
-handler.category = 'Owner';
+handler.help = ['join <link>'];
+handler.tags = ['owner'];
 handler.desc = 'Memasukkan bot ke grup via link undangan';
 handler.owner = true;
 export default handler;

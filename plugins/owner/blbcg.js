@@ -67,7 +67,8 @@ const handler = async (m, { client, from, text, args, command, isOwner, reply })
 };
 
 handler.command = ['addblbcg', 'delblbcg', 'listblbcg', 'blbcg'];
-handler.category = 'Owner';
+handler.help = ['blbcg'];
+handler.tags = ['owner'];
 handler.desc = 'Kelola daftar grup yang dikecualikan (blacklist) dari broadcast group';
 handler.owner = true;
 export default handler;

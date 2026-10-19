@@ -31,6 +31,7 @@ const handler = async (m, { client, from, reply }) => {
 };
 
 handler.command = ['s', 'stiker', 'sticker', 'sgif'];
-handler.category = 'Maker';
+handler.help = ['sticker'];
+handler.tags = ['maker'];
 handler.desc = 'Konversi foto/video jadi stiker WA';
 export default handler;

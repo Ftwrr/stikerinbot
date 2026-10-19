@@ -87,6 +87,7 @@ export default async function handler(m, { client, from, reply }) {
 }
 
 handler.command = ['q', 'ambilq', 'quoted'];
-handler.category = 'Tools';
+handler.help = ['quoted'];
+handler.tags = ['tools'];
 handler.desc = 'Ambil pesan yang di-reply oleh pesan lain';
 handler.owner = false;

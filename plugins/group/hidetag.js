@@ -127,6 +127,7 @@ const handler = async (m, { client, from, text, command, reply, isOwner }) => {
 };
 
 handler.command = ['hidetag', 'tagall', 'totag', 'everyone', 'pengumuman', 'announce'];
-handler.category = 'Group';
+handler.help = ['hidetag <teks>'];
+handler.tags = ['group'];
 handler.desc = 'Tag semua member grup (Admin only)';
 export default handler;

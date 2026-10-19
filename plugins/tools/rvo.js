@@ -52,7 +52,8 @@ const handler = async (m, { client, from, reply }) => {
 };
 
 handler.command = ['rvo', 'readviewonce', 'viewonce'];
-handler.category = 'Tools';
+handler.help = ['rvo'];
+handler.tags = ['tools'];
 handler.desc = 'Buka media sekali lihat (View-Once)';
 handler.owner = false;
 export default handler;

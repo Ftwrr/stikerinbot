@@ -41,6 +41,7 @@ const handler = async (m, { reply }) => {
 };
 
 handler.command = ['lb', 'leaderboard', 'top', 'rank', 'toprank', 'toplevel', 'lblevel'];
-handler.category = 'General';
+handler.help = ['leaderboard'];
+handler.tags = ['general'];
 handler.desc = 'Menampilkan 10 pengguna peringkat level & EXP tertinggi';
 export default handler;

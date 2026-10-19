@@ -40,7 +40,8 @@ ${usedPrefix + command} 🎉 Selamat @user telah dipromosikan menjadi Admin di @
 };
 
 handler.command = ['setpromote', 'setp'];
-handler.category = 'Group';
+handler.help = ['setpromote <teks>'];
+handler.tags = ['group'];
 handler.desc = 'Mengatur teks kustom saat member diangkat menjadi Admin grup';
 handler.group = true;
 handler.admin = true;

@@ -33,7 +33,8 @@ const handler = async (m, { args, command, reply }) => {
 };
 
 handler.command = ['antilink', 'antilinkgc', 'nolink'];
-handler.category = 'Group';
+handler.help = ['antilink <on/off>'];
+handler.tags = ['group'];
 handler.desc = 'Aktifkan/matikan anti-link di grup (Admin only)';
 handler.group = true;
 handler.admin = true;

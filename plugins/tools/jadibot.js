@@ -79,6 +79,7 @@ const handler = async (msg, { client, from, text, args, command, isOwner, reply,
 };
 
 handler.command = ['jadibot', 'stopjadibot', 'listjadibot', 'delsession', 'makebot', 'jadibotlist', 'jadibotstop'];
-handler.category = 'Tools';
+handler.help = ['jadibot', 'stopjadibot', 'listjadibot'];
+handler.tags = ['tools'];
 handler.desc = 'Kloning bot jadi sub-bot nomor sendiri';
 export default handler;

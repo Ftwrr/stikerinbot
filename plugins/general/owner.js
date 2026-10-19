@@ -29,7 +29,8 @@ const handler = async (m, { client, from, reply }) => {
 };
 
 handler.command = ['owner', 'creator', 'pemilik'];
-handler.category = 'General';
+handler.help = ['owner'];
+handler.tags = ['general'];
 handler.desc = 'Mengirim kartu kontak WhatsApp owner bot';
 handler.limit = false;
 export default handler;

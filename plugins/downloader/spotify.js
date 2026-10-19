@@ -47,7 +47,8 @@ const handler = async (m, { client, from, text, usedPrefix, command, reply }) =>
 };
 
 handler.command = ['spotify', 'spotidown', 'spotplay', 'sp'];
-handler.category = 'Downloader';
+handler.help = ['spotify <judul/link>'];
+handler.tags = ['downloader'];
 handler.desc = 'Cari dan download audio/lagu dari Spotify';
 handler.limit = 1;
 

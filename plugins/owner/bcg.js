@@ -94,7 +94,8 @@ _Contoh: *.bcg Halo semua, bot sedang maintenance fitur baru!*_`);
 };
 
 handler.command = ['bcg', 'broadcastgroup', 'bcgroup', 'bcgc'];
-handler.category = 'Owner';
+handler.help = ['bcg <teks>'];
+handler.tags = ['owner'];
 handler.desc = 'Mengirimkan pesan siaran / broadcast ke seluruh grup yang diikuti bot';
 handler.owner = true;
 export default handler;

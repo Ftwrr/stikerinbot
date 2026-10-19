@@ -42,7 +42,8 @@ ${usedPrefix + command} Halo kak @user! Selamat datang di @subject. Jangan lupa 
 };
 
 handler.command = ['setwelcome', 'setw'];
-handler.category = 'Group';
+handler.help = ['setwelcome <teks>'];
+handler.tags = ['group'];
 handler.desc = 'Mengatur teks kustom sambutan member baru di grup';
 handler.group = true;
 handler.admin = true;

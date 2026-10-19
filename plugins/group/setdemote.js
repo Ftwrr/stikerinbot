@@ -40,7 +40,8 @@ ${usedPrefix + command} 📉 Jabatan admin @user telah diturunkan menjadi Member
 };
 
 handler.command = ['setdemote', 'setd'];
-handler.category = 'Group';
+handler.help = ['setdemote <teks>'];
+handler.tags = ['group'];
 handler.desc = 'Mengatur teks kustom saat admin diturunkan menjadi member biasa di grup';
 handler.group = true;
 handler.admin = true;

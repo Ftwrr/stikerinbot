@@ -81,6 +81,5 @@ const handler = async (m, extra) => {
 
 handler.custom = true;
 handler.owner = true;
-handler.category = 'Owner';
 handler.desc = 'JavaScript Eval (>) & Terminal Exec ($)';
 export default handler;

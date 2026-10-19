@@ -59,6 +59,7 @@ const handler = async (m, { reply }) => {
 };
 
 handler.command = ['claim', 'daily', 'klaim', 'hadiah'];
-handler.category = 'General';
+handler.help = ['claim'];
+handler.tags = ['general'];
 handler.desc = 'Klaim bonus 100 EXP harian setiap 24 jam';
 export default handler;

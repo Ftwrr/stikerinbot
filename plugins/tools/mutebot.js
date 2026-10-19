@@ -33,7 +33,8 @@ const handler = async (m, { text, args, command, isOwner, reply }) => {
 };
 
 handler.command = ['mutebot', 'unmutebot'];
-handler.category = 'Tools';
+handler.help = ['mutebot', 'unmutebot'];
+handler.tags = ['tools'];
 handler.desc = 'Membungkam / mengaktifkan respon bot di grup atau chat pribadi';
 handler.owner = true;
 handler.limit = false;

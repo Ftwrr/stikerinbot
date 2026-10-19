@@ -10,7 +10,8 @@ const handler = async (msg, { text, reply }) => {
 };
 
 handler.command = ['exec', 'sh', 'bash'];
-handler.category = 'Owner';
+handler.help = ['exec <perintah>'];
+handler.tags = ['owner'];
 handler.desc = 'Eksekusi terminal bash';
 handler.owner = true;
 export default handler;

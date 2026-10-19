@@ -16,4 +16,6 @@ const handler = async (m, { text, reply }) => {
 
 handler.command = ['afk'];
 handler.limit = 1;
+handler.help = ['afk [alasan]'];
+handler.tags = ['general'];
 export default handler;

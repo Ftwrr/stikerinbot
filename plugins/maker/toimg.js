@@ -25,6 +25,7 @@ const handler = async (m, { client, from, reply }) => {
 };
 
 handler.command = ['toimg', 'tovideo', 'tovid'];
-handler.category = 'Maker';
+handler.help = ['toimg'];
+handler.tags = ['maker'];
 handler.desc = 'Ubah stiker jadi gambar/video';
 export default handler;

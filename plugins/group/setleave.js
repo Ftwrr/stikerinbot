@@ -40,7 +40,8 @@ ${usedPrefix + command} Selamat tinggal kak @user 👋 Semoga sukses selalu di l
 };
 
 handler.command = ['setleave', 'setbye', 'setkeluar'];
-handler.category = 'Group';
+handler.help = ['setleave <teks>'];
+handler.tags = ['group'];
 handler.desc = 'Mengatur teks kustom saat member keluar dari grup';
 handler.group = true;
 handler.admin = true;
