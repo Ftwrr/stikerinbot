@@ -13,7 +13,7 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import qrcode from 'qrcode-terminal';
 
-import { resolvePhoneNumberFromMsg } from './lib/lid_helper.js';
+import { resolvePhoneNumberFromMsg, resolvePhoneNumberFromLid } from './lib/lid_helper.js';
 import { restoreClonedSessions } from './lib/jadibot_zapo.js';
 import { loadPlugins, startPluginWatcher, handlePluginMessage } from './lib/plugin_manager.js';
 import { smsg } from './lib/simple.js';
@@ -25,6 +25,7 @@ import { evaluateAntiCall } from './lib/anti_call.js';
 import { messageCache } from './lib/message_cache.js';
 import { printMessageLog, logger } from './lib/logger.js';
 import { renderTerminalImage } from './lib/terminal_image.js';
+import { getGroupName } from './lib/group_utils.js';
 
 const AUTH_DIR_NAME = process.env.SESSION_DIR || "session_auth";
 
@@ -986,7 +987,21 @@ async function connectToWhatsApp() {
 
         const sender = m.sender || rawMsg.key.participant || rawMsg.key.remoteJid || '';
         const senderName = m.name || (rawMsg.key.fromMe ? 'Me (Bot)' : (rawMsg.pushName || sender.split('@')[0] || 'Unknown'));
-        const chatTargetName = chatNameCache.get(m.chat) || m.chat?.split('@')[0] || '';
+
+        // Nama chat: cache kontak → nama grup (ter-cache) → LID→PN→kontak → pushName → nomor
+        let chatTargetName = chatNameCache.get(m.chat) || '';
+        if (!chatTargetName && m.isGroup) {
+            chatTargetName = await getGroupName(client, m.chat);
+        }
+        if (!chatTargetName && !m.isGroup) {
+            const pn = m.chat?.endsWith('@lid') ? resolvePhoneNumberFromLid(m.chat) : (m.chat?.split('@')[0] || '');
+            chatTargetName = (pn && chatNameCache.get(pn + '@s.whatsapp.net')) || m.name || m.pushName || pn;
+        }
+        // pushName kontak lain (incoming) dijadikan nama chat DM untuk log berikutnya
+        if (!m.isGroup && !rawMsg.key.fromMe && (m.name || m.pushName)) {
+            chatNameCache.set(m.chat, m.name || m.pushName);
+        }
+        if (!chatTargetName) chatTargetName = m.chat?.split('@')[0] || '';
 
         printMessageLog(m, {
             mtype: mType,
@@ -1146,6 +1161,7 @@ async function connectToWhatsApp() {
             realPhone,
             isOwner,
             reply,
+            chatName: chatTargetName,
             downloadMsgMedia,
             convertToWebp,
             addExif
