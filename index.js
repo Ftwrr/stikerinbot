@@ -23,6 +23,8 @@ import { getBotSettings } from './lib/settings.js';
 import { startBannedExpiryScheduler } from './lib/banned_scheduler.js';
 import { evaluateAntiCall } from './lib/anti_call.js';
 import { messageCache } from './lib/message_cache.js';
+import { printMessageLog, logger } from './lib/logger.js';
+import { renderTerminalImage } from './lib/terminal_image.js';
 
 const AUTH_DIR_NAME = process.env.SESSION_DIR || "session_auth";
 
@@ -580,7 +582,7 @@ async function connectToWhatsApp() {
         }
     });
 
-    const logger = await createPinoLogger({ level: 'silent' });
+    const pinoLogger = await createPinoLogger({ level: 'silent' });
 
     const mediaProcessor = createMediaProcessor();
 
@@ -593,7 +595,7 @@ async function connectToWhatsApp() {
         deviceOsDisplayName: 'macOS',
         history: { enabled: false },
         media: { processor: mediaProcessor }
-    }, logger);
+    }, pinoLogger);
 
     client.on('auth_qr', ({ qr }) => {
         console.log(`[QR] Scan QR code:`);
@@ -608,12 +610,12 @@ async function connectToWhatsApp() {
     });
 
     client.on('auth_paired', ({ credentials }) => {
-        console.log(`[PAIR] Successfully paired! JID: ${credentials?.meJid}`);
+        logger.success('PAIR', `Berhasil terhubung ke akun! JID: ${credentials?.meJid}`);
     });
 
     client.on('connection', async (event) => {
         if (event.status === 'open') {
-            console.log('WhatsApp connection opened successfully!');
+            logger.success('CONNECT', 'Koneksi WhatsApp berhasil tersambung!');
             const myJidRaw = client.auth?.credentials?.pnJid || client.auth?.credentials?.meJid || `${process.env.PHONE_NUMBER || '628567611130'}@s.whatsapp.net`;
             const cleanMyNumber = myJidRaw.split('@')[0].split(':')[0].replace(/[^0-9]/g, '');
             client.user = {
@@ -762,7 +764,7 @@ async function connectToWhatsApp() {
                 try { restoreWwGames(client); } catch (e) { console.error('[Werewolf Restore]', e.message); }
             }, 3000);
         } else if (event.status === 'close') {
-            console.log(`Disconnected: ${event.reason}`);
+            logger.warn('CONNECT', `Koneksi terputus: ${event.reason || 'Closed'}`);
             const shouldReconnect = event.reason !== 'loggedOut' && event.reason !== 'loggedOutElsewhere';
             if (shouldReconnect) {
                 setTimeout(() => {
@@ -795,7 +797,7 @@ async function connectToWhatsApp() {
         const gate = evaluateAntiCall(callEvent, callerJid);
         if (!gate.handle) return;
 
-        console.log(`[Anti-Call] Menolak panggilan dari: ${callerJid} (type: ${callEvent.type || 'unknown'}, callId: ${callEvent.callId || '-'})`);
+        logger.warn('Anti-Call', `Menolak panggilan dari: ${callerJid} (tipe: ${callEvent.type || 'unknown'}, id: ${callEvent.callId || '-'})`);
         try {
             // Tolak panggilan via lowLevelCoordinator jika ada
             if (client.lowLevel?.sendNode && callEvent.callId) {
@@ -986,7 +988,36 @@ async function connectToWhatsApp() {
         const senderName = m.name || (rawMsg.key.fromMe ? 'Me (Bot)' : (rawMsg.pushName || sender.split('@')[0] || 'Unknown'));
         const chatTargetName = chatNameCache.get(m.chat) || m.chat?.split('@')[0] || '';
 
-        console.log(`[${mType}${rawMsg.key.fromMe ? ':fromMe' : ''}] From (${senderName} <${sender}>) In (${chatTargetName}) - ${mText ? mText.substring(0, 80) : ''}`);
+        printMessageLog(m, {
+            mtype: mType,
+            senderName,
+            chatName: chatTargetName
+        });
+
+        // ─── TAMPILKAN PREVIEW MEDIA (FOTO/STIKER) SECARA DEFAULT ────────────
+        const isMediaImg = ['imageMessage', 'stickerMessage', 'videoMessage'].includes(mType) ||
+            Boolean(rawMsg.message?.imageMessage || rawMsg.message?.stickerMessage || rawMsg.message?.videoMessage);
+
+        if (isMediaImg) {
+            (async () => {
+                try {
+                    let buf = null;
+                    if (typeof m.download === 'function') {
+                        buf = await m.download().catch(() => null);
+                    }
+                    if (!buf && m.quoted && typeof m.quoted.download === 'function') {
+                        buf = await m.quoted.download().catch(() => null);
+                    }
+                    if (!buf) {
+                        buf = await downloadMedia(rawMsg, client).catch(() => null);
+                    }
+                    if (buf && buf.length > 0) {
+                        const rendered = await renderTerminalImage(buf);
+                        if (rendered) process.stdout.write(rendered + '\n');
+                    }
+                } catch (_) {}
+            })();
+        }
 
         try {
             const logFileName = path.join('db', `chat-${AUTH_DIR_NAME}.log`);
@@ -1046,7 +1077,7 @@ async function connectToWhatsApp() {
                         participant: statusSender,
                         type: 'read'
                     });
-                    console.log(`[Auto-Read Status] Sukses tandai status dibaca: ${statusSender} (${rawMsg.key.id})`);
+                    logger.info('Auto-Read Status', `Tandai status dibaca: ${statusSender} (${rawMsg.key.id})`);
                 } catch (e) {
                     console.error('[Auto-Read Status Error]', e.message || e);
                 }
