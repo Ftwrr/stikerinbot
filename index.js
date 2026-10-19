@@ -835,10 +835,8 @@ async function connectToWhatsApp() {
                 if (!existingUser) {
                     global.db.data.users[callerJid] = {
                         name: callerJid.split('@')[0],
-                        limit: 20,
                         exp: 0,
                         level: 1,
-                        premium: false,
                         banned: true,
                         bannedExpiry: expiryTime,
                         bannedReason: 'Call Bot'

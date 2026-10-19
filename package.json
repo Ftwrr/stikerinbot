@@ -8,7 +8,8 @@
     "start": "bun index.js",
     "dev": "bun --watch index.js",
     "setup": "bash setup.sh",
-    "test": "bun test"
+    "test": "bun test",
+    "docs:update": "node scripts/sync-docs.js"
   },
   "dependencies": {
     "@zapo-js/mcp-server": "^1.2.0",

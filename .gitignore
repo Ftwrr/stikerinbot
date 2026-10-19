@@ -48,5 +48,7 @@ Thumbs.db
 Desktop.ini
 .*.swp
 AGENTS.md
+llms.txt
+llms-full.txt
 waweb
 web-client

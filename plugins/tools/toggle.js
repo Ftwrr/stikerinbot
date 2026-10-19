@@ -46,6 +46,44 @@ const handler = async (m, extra) => {
         return reply(isEnable ? ON_MSG : OFF_MSG);
     }
 
+    // ── FITUR KHUSUS GRUP (Bisa diatur oleh Admin Grup atau Owner) ───────────
+    if (m.isGroup && ['welcome', 'leave', 'bye', 'detect', 'antilink', 'link'].includes(sub)) {
+        let access;
+        try {
+            const { resolveGroupAccess } = await import('../../lib/group_utils.js');
+            access = await resolveGroupAccess(extra.conn || extra.client, m);
+        } catch (_) {}
+
+        if (!access?.isAdmin && !isOwner) {
+            return reply('⛔ Hanya Admin grup atau Owner bot yang dapat mengubah pengaturan grup ini!');
+        }
+
+        global.db.data.chats = global.db.data.chats || {};
+        global.db.data.chats[m.chat] = global.db.data.chats[m.chat] || {};
+        const chatData = global.db.data.chats[m.chat];
+
+        if (sub === 'welcome') {
+            chatData.welcome = isEnable;
+            global.db.scheduleSave();
+            return reply(`👋 Pesan sambutan (welcome) berhasil *${isEnable ? 'DIAKTIFKAN ✅' : 'DIMATIKAN ❌'}*.`);
+        }
+        if (sub === 'leave' || sub === 'bye') {
+            chatData.leave = isEnable;
+            global.db.scheduleSave();
+            return reply(`👋 Pesan member keluar (leave) berhasil *${isEnable ? 'DIAKTIFKAN ✅' : 'DIMATIKAN ❌'}*.`);
+        }
+        if (sub === 'detect') {
+            chatData.detect = isEnable;
+            global.db.scheduleSave();
+            return reply(`🔔 Notifikasi promote/demote berhasil *${isEnable ? 'DIAKTIFKAN ✅' : 'DIMATIKAN ❌'}*.`);
+        }
+        if (sub === 'antilink' || sub === 'link') {
+            chatData.antiLink = isEnable;
+            global.db.scheduleSave();
+            return reply(`🔗 Anti-link grup berhasil *${isEnable ? 'DIAKTIFKAN ✅' : 'DIMATIKAN ❌'}*.`);
+        }
+    }
+
     if (isOwner) {
         await reply(`⚠️ *PENGATURAN TIDAK DIKENALI*
 

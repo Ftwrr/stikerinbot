@@ -20,7 +20,7 @@ const handler = async (m, { client, from, reply }) => {
         const audioMsg = targetMsg.audioMessage || targetMsg.message?.audioMessage;
 
         if (imageMsg) {
-            const buf = await downloadMedia(targetMsg);
+            const buf = await downloadMedia(targetMsg, client);
             const caption = imageMsg.caption ? `🔓 *[View-Once Unlocked]*\n\n${imageMsg.caption}` : '🔓 *[View-Once Unlocked]*';
             await client.sendMessage(sendChat, {
                 image: buf,
@@ -28,7 +28,7 @@ const handler = async (m, { client, from, reply }) => {
                 caption
             }, { quoted: { key: m.key } });
         } else if (videoMsg) {
-            const buf = await downloadMedia(targetMsg);
+            const buf = await downloadMedia(targetMsg, client);
             const caption = videoMsg.caption ? `🔓 *[View-Once Unlocked]*\n\n${videoMsg.caption}` : '🔓 *[View-Once Unlocked]*';
             await client.sendMessage(sendChat, {
                 video: buf,
@@ -36,7 +36,7 @@ const handler = async (m, { client, from, reply }) => {
                 caption
             }, { quoted: { key: m.key } });
         } else if (audioMsg) {
-            const buf = await downloadMedia(targetMsg);
+            const buf = await downloadMedia(targetMsg, client);
             await client.sendMessage(sendChat, {
                 audio: buf,
                 mimetype: audioMsg.mimetype || 'audio/mp4',
